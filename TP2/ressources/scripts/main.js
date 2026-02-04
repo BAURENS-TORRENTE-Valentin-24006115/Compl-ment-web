@@ -1,14 +1,81 @@
 // exo 1
-const A_temperature = [];
 
-// exo 2 - 3 - 4
-let O_temp = document.getElementById("temperature");
-let O_message = document.getElementById("message");
-let i = 0;
+class RapportMeteoObservable {
+    constructor() {
+        this.temperature = [];
+        this.classesObservateurs = [];
+    }
 
+    ajouterObservateur(observateur) {
+        this.classesObservateurs.push(observateur);
+    }
+
+    addTemperature(newTemperature) {
+        this.temperature.push(newTemperature);
+    }
+
+    sendNewTemperature(newTemperature) {
+        this.addTemperature(newTemperature);
+        this.classesObservateurs.forEach(observateur => {
+            observateur.update(this.temperature);
+        });
+    }
+}
+
+
+class TemperatureTempsReel {
+    constructor(temperatureElement) {
+        this.temperatureElement = temperatureElement;
+    }
+
+    update(temperature) {
+        this.temperatureElement.textContent = temperature[temperature.length - 1] + "°C";
+    }
+}
+
+class HistoriqueTemperatures {
+    constructor(historiqueElement, TemperaturesElements) {
+        this.historiqueElement = historiqueElement;
+    }
+
+    update(temperature) {
+        this.displayHistorique(temperature);
+    }
+    displayHistorique(temperature) {
+        this.historiqueElement.textContent += temperature[temperature.length - 1] + "°C, ";
+    }
+}
+
+class AlerteTemperature {
+    constructor(messageElement, temperatureElement) {
+        this.messageElement = messageElement;
+        this.temperatureElement = temperatureElement;
+    }
+
+    update(temperature) {
+        this.checkAlerte(temperature);
+    }
+
+    checkAlerte(temperature) {
+        const temp = temperature[temperature.length - 1];
+        this.temperatureElement.removeAttribute("class");
+        if (temp <= 0) {
+            this.temperatureElement.setAttribute("class", "bleu");
+            this.messageElement.textContent = "Brrrrrrr, un peu froid ce matin, mets ta cagoule !";
+        } else if (temp <= 20) {
+            this.temperatureElement.setAttribute("class", "vert");
+            this.messageElement.textContent = "";
+        } else if (temp <= 30) {
+            this.temperatureElement.setAttribute("class", "orange");
+            this.messageElement.textContent = "";
+        } else {
+            this.temperatureElement.setAttribute("class", "rouge");
+            this.messageElement.textContent = "Caliente ! Vamos a la playa, ho hoho hoho !!";
+        }
+    }
+}
 const tabs = document.querySelectorAll('[role="tab"]');
 const panels = document.querySelectorAll('[role="tabpanel"]');
-
 function switchTab(oldTab, newTab) {
     oldTab.setAttribute('aria-selected', 'false');
     oldTab.setAttribute('tabindex', '-1');
@@ -66,28 +133,20 @@ tabs.forEach(tab => {
     });
 });
 
-// ===== GESTION DES TEMPÉRATURES =====
+const rapportMeteo = new RapportMeteoObservable();
+
+const O_temp = document.getElementById("temperature");
+const O_message = document.getElementById("message");
 const O_liste = document.getElementById("listeHistorique");
 
+const temperatureTempsReel = new TemperatureTempsReel(O_temp);
+const historiqueTemperatures = new HistoriqueTemperatures(O_liste);
+const alerteTemperature = new AlerteTemperature(O_message, O_temp);
+
+rapportMeteo.ajouterObservateur(temperatureTempsReel);
+rapportMeteo.ajouterObservateur(historiqueTemperatures);
+rapportMeteo.ajouterObservateur(alerteTemperature);
 setInterval(() => {
-    A_temperature.push(Math.floor(Math.random() * 50) - 10);
-    O_temp.textContent = A_temperature[i] + "°C";
-    O_temp.removeAttribute("class");
-
-    if (A_temperature[i] <= 0) O_temp.setAttribute("class", "bleu");
-    else if (A_temperature[i] <= 20) O_temp.setAttribute("class", "vert");
-    else if (A_temperature[i] <= 30) O_temp.setAttribute("class", "orange");
-    else O_temp.setAttribute("class", "rouge");
-
-    if (O_temp.getAttribute("class") === "bleu")
-        O_message.textContent = "Brrrrrrr, un peu froid ce matin, mets ta cagoule !";
-    else if ((O_temp.getAttribute("class") === "rouge"))
-        O_message.textContent = "Caliente ! Vamos a la playa, ho hoho hoho !!";
-    else
-        O_message.textContent = "";
-
-    O_liste.textContent += A_temperature[i] + "°C, ";
-
-    ++i;
-
+    rapportMeteo.sendNewTemperature(Math.floor(Math.random() * 50) - 10);
 }, 2000)
+
