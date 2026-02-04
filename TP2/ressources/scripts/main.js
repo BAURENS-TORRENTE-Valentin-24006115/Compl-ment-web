@@ -19,6 +19,7 @@ class RapportMeteoObservable {
         this.classesObservateurs.forEach(observateur => {
             observateur.update(this.temperature);
         });
+
     }
 }
 
@@ -36,6 +37,23 @@ class TemperatureTempsReel {
 class HistoriqueTemperatures {
     constructor(historiqueElement, TemperaturesElements) {
         this.historiqueElement = historiqueElement;
+        this.jsonData = null;
+        this.loadTemperatures();
+    }
+
+    async loadTemperatures() {
+        try {
+            const response = await fetch('ressources/scripts/temps.json');
+            this.jsonData = await response.json();
+            this.temperatures = [];
+
+            this.jsonData.capteurs.forEach(capteur => {
+                this.temperatures.push(parseInt(capteur.Valeur));
+            });
+            this.historiqueElement.textContent = this.temperatures.join("°C, ") + "°C, ";
+        } catch (error) {
+            console.error('Erreur lors du chargement du fichier JSON:', error);
+        }
     }
 
     update(temperature) {
