@@ -74,6 +74,25 @@ class AlerteTemperature {
         }
     }
 }
+
+
+const rapportMeteo = new RapportMeteoObservable();
+
+const O_temp = document.getElementById("temperature");
+const O_message = document.getElementById("message");
+const O_liste = document.getElementById("listeHistorique");
+
+const temperatureTempsReel = new TemperatureTempsReel(O_temp);
+const historiqueTemperatures = new HistoriqueTemperatures(O_liste);
+const alerteTemperature = new AlerteTemperature(O_message, O_temp);
+
+rapportMeteo.ajouterObservateur(temperatureTempsReel);
+rapportMeteo.ajouterObservateur(historiqueTemperatures);
+rapportMeteo.ajouterObservateur(alerteTemperature);
+setInterval(() => {
+    rapportMeteo.sendNewTemperature(Math.floor(Math.random() * 50) - 10);
+}, 2000)
+
 const tabs = document.querySelectorAll('[role="tab"]');
 const panels = document.querySelectorAll('[role="tabpanel"]');
 function switchTab(oldTab, newTab) {
@@ -133,20 +152,4 @@ tabs.forEach(tab => {
     });
 });
 
-const rapportMeteo = new RapportMeteoObservable();
-
-const O_temp = document.getElementById("temperature");
-const O_message = document.getElementById("message");
-const O_liste = document.getElementById("listeHistorique");
-
-const temperatureTempsReel = new TemperatureTempsReel(O_temp);
-const historiqueTemperatures = new HistoriqueTemperatures(O_liste);
-const alerteTemperature = new AlerteTemperature(O_message, O_temp);
-
-rapportMeteo.ajouterObservateur(temperatureTempsReel);
-rapportMeteo.ajouterObservateur(historiqueTemperatures);
-rapportMeteo.ajouterObservateur(alerteTemperature);
-setInterval(() => {
-    rapportMeteo.sendNewTemperature(Math.floor(Math.random() * 50) - 10);
-}, 2000)
 
